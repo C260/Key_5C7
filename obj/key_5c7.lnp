@@ -1,0 +1,4 @@
+"..\obj\STARTUP.obj",
+"..\obj\main.obj" 
+TO "..\obj\key_5c7" 
+PRINT(".\key_5c7.m51") RAMSIZE(256) 

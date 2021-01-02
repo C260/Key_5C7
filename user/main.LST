@@ -1,0 +1,266 @@
+C51 COMPILER V9.51   MAIN                                                                  07/21/2020 07:07:55 PAGE 1   
+
+
+C51 COMPILER V9.51, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN ..\obj\main.obj
+COMPILER INVOKED BY: D:\Keil_4\keil4\C51\BIN\C51.EXE main.c BROWSE DEBUG OBJECTEXTEND TABS(2) OBJECT(..\obj\main.obj)
+
+line level    source
+
+   1          #include <reg52.h>
+   2          typedef unsigned int uint;
+   3          typedef unsigned char uchar;
+   4          
+   5          sbit key1=P1^0;
+   6          sbit key2=P1^1;
+   7          sbit key3=P1^2;
+   8          sbit key4=P1^3;
+   9          sbit key5=P1^4;
+  10          
+  11          sbit led1 = P2^0;
+  12          sbit led2 = P2^1;
+  13          sbit led3 = P2^2;
+  14          sbit led4 = P2^3;
+  15          sbit led5 = P2^4;
+  16          sbit led6 = P2^5;
+  17          sbit led7 = P2^6;
+  18          
+  19          void Init();
+  20          void delay(uint Time);
+  21          void test_v1(uchar key,uchar keycan_v);
+  22          void key_process(uchar key,uchar trg,uchar cont);
+  23          void keycan();
+  24          uchar oled_key = 0;
+  25          uchar new_key = 0;
+  26          uchar j,vl;
+  27          
+  28          void main()
+  29          {
+  30   1        Init();
+  31   1        while(1)
+  32   1        {
+  33   2          keycan();
+  34   2        }
+  35   1      }
+  36                          
+  37          void keycan()
+  38          {
+  39   1        uint keycan_v;
+  40   1        uchar i = 0,key;
+  41   1        uchar keyCode;
+  42   1        P1 = 0x1f;
+  43   1        if((P1&0x1f) != 0x1f)
+  44   1        {
+  45   2          if((P1&0x1f) != 0x1f)key = P1&0x1f;
+  46   2          test_v1(key,0x3f);
+  47   2        }
+  48   1        else
+  49   1        {
+  50   2          keycan_v  = 0x1e;
+  51   2          for(i=0;i<3;i++)
+  52   2          {
+  53   3      //      if(vl >= 20)vl = 0;
+  54   3            P1 = keycan_v;
+  55   3            if((P1&0x1f) != keycan_v)
+C51 COMPILER V9.51   MAIN                                                                  07/21/2020 07:07:55 PAGE 2   
+
+  56   3            {
+  57   4              key = P1&0x1f;
+  58   4              keyCode = keycan_v;
+  59   4              j = i;
+  60   4              vl++;
+  61   4            }
+  62   3            else
+  63   3            {
+  64   4              key = keycan_v;
+  65   4              keyCode = keycan_v;
+  66   4            }
+  67   3            test_v1(key,keyCode);
+  68   3            keycan_v = ((keycan_v<<1)|0x01)&0x1f;
+  69   3          }
+  70   2          delay(50);
+  71   2        }
+  72   1      }
+  73          /*******************************************************/
+  74          void test_v1(uchar key,uchar keycan_v)
+  75          {
+  76   1       uchar databuf,trg,cont;
+  77   1       uchar trigger_T,continue_T;
+  78   1        switch(keycan_v)
+  79   1        {
+  80   2          case 0x1e:
+  81   2            if(j == 0)
+  82   2            {
+  83   3              if(key == 0x0e||key == 0x16)
+  84   3                databuf = key ^ 0x1f;
+  85   3              else
+  86   3                databuf = key ^ keycan_v;
+  87   3            }
+  88   2            break;
+  89   2          case 0x1d:
+  90   2            if(j == 1)
+  91   2            {
+  92   3              if(key == 0x0d||key == 0x15)
+  93   3                databuf = key ^ 0x1f;
+  94   3              else
+  95   3                databuf = key ^ keycan_v;
+  96   3            }
+  97   2            break;
+  98   2          case 0x1b:
+  99   2            if(j == 2)
+ 100   2            {
+ 101   3              if(key == 0x0b||key == 0x13)
+ 102   3                databuf = key ^ 0x1f;
+ 103   3              else
+ 104   3                databuf = key ^ keycan_v;
+ 105   3            }
+ 106   2            break;
+ 107   2          case 0x3f:
+ 108   2            if(key == 0x0f)
+ 109   2              databuf = key ^ 0x1f;
+ 110   2            break;
+ 111   2          default:
+ 112   2      //      databuf = 0;
+ 113   2            break;
+ 114   2        }
+ 115   1        trg = databuf&(databuf^cont);
+ 116   1        cont = databuf;
+ 117   1        if((trg != 0) && (cont != 0))trigger_T = 1;
+C51 COMPILER V9.51   MAIN                                                                  07/21/2020 07:07:55 PAGE 3   
+
+ 118   1        else if((trg == 0) && (cont != 0)&&(vl == 10))continue_T = 1;
+ 119   1        else {trigger_T = 0;continue_T = 0;}
+ 120   1        key_process(key,trigger_T,continue_T);
+ 121   1      
+ 122   1      }
+ 123          /***************************************************/
+ 124          void key_process(uchar key,uchar trg,uchar cont)
+ 125          {
+ 126   1        static uchar flag1,flag2,flag3,flag4,flag5,flag6,flag7;
+ 127   1        
+ 128   1        if((key == 0x0f) && (trg == 1))
+ 129   1        {
+ 130   2          flag7++;
+ 131   2          
+ 132   2          if(flag7 == 1)
+ 133   2            led7 = 0;
+ 134   2          else
+ 135   2            led7 = 1;
+ 136   2          if(flag7 == 2)
+ 137   2              flag7 = 0;
+ 138   2        }
+ 139   1        if(((key == 0x0e) && (trg == 1)) || ((key == 0x0e) && (cont == 1)))
+ 140   1        {
+ 141   2          vl = 0;
+ 142   2          flag1++;
+ 143   2          
+ 144   2          if(flag1 == 1)
+ 145   2            led1 = 0;
+ 146   2          else
+ 147   2            led1 = 1;
+ 148   2          if(flag1 == 2)
+ 149   2            flag1 = 0;
+ 150   2        }
+ 151   1        if(((key == 0x16) && (trg == 1)) || ((key == 0x16) && (cont == 1)))
+ 152   1        {
+ 153   2          vl = 0;
+ 154   2          flag2++;
+ 155   2          
+ 156   2          if(flag2 == 1)
+ 157   2            led2 = 0;
+ 158   2          else
+ 159   2            led2 = 1;
+ 160   2          if(flag2 == 2)
+ 161   2              flag2 = 0;
+ 162   2        }
+ 163   1        if(((key == 0x0d) && (trg == 1)) || ((key == 0x0d) && (cont == 1)))   
+ 164   1        {
+ 165   2          vl = 0;
+ 166   2          flag3++;
+ 167   2          
+ 168   2          if(flag3 == 1)
+ 169   2            led3 = 0;
+ 170   2          else
+ 171   2            led3 = 1;
+ 172   2          if(flag3 == 2)
+ 173   2              flag3 = 0;
+ 174   2        }
+ 175   1        if(((key == 0x15) && (trg == 1)) || ((key == 0x15) && (cont == 1)))
+ 176   1        {
+ 177   2          vl = 0;
+ 178   2          flag4++;
+ 179   2          
+C51 COMPILER V9.51   MAIN                                                                  07/21/2020 07:07:55 PAGE 4   
+
+ 180   2          if(flag4 == 1)
+ 181   2            led4 = 0;
+ 182   2          else
+ 183   2            led4 = 1;
+ 184   2          if(flag4 == 2)
+ 185   2              flag4 = 0;
+ 186   2        }
+ 187   1        if(((key == 0x0b) && (trg == 1)) || ((key == 0x0b) && (cont == 1)))
+ 188   1        {
+ 189   2          vl = 0;
+ 190   2          flag5++;
+ 191   2      
+ 192   2          if(flag5 == 1)
+ 193   2            led5 = 0; 
+ 194   2          else
+ 195   2            led5 = 1;   
+ 196   2          if(flag5 == 2)
+ 197   2              flag5 = 0;
+ 198   2        }
+ 199   1        if(((key == 0x13) && (trg == 1)) || ((key == 0x13) && (cont == 1)))
+ 200   1        {
+ 201   2          vl = 0;
+ 202   2          flag6++;
+ 203   2          
+ 204   2          if(flag6 == 1)
+ 205   2            led6 = 0;
+ 206   2          else
+ 207   2            led6 = 1;
+ 208   2          if(flag6 == 2)
+ 209   2              flag6 = 0;
+ 210   2        }
+ 211   1      
+ 212   1      }
+ 213          void Init()
+ 214          {
+ 215   1        key1 = 1;
+ 216   1        key2 = 1;
+ 217   1        key3 = 1;
+ 218   1        key4 = 1;
+ 219   1        key5 = 1;
+ 220   1        
+ 221   1        led1 = 1;
+ 222   1        led2 = 1;
+ 223   1        led3 = 1;
+ 224   1        led3 = 1;
+ 225   1        led5 = 1;
+ 226   1        led6 = 1;
+ 227   1        led7 = 1;
+ 228   1      }
+ 229          
+ 230          void delay(uint Time)
+ 231          {
+ 232   1        uint x,y;
+ 233   1        for(x=Time;x>0;x--)
+ 234   1          for(y=110;y>0;y--);
+ 235   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    570    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+C51 COMPILER V9.51   MAIN                                                                  07/21/2020 07:07:55 PAGE 5   
+
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     11       9
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
